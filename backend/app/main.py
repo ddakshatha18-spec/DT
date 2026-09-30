@@ -27,7 +27,10 @@ app.add_middleware(
 )
 
 from backend.app.routers.auth import router as auth_router
+from backend.app.routers.alerts import router as alerts_router
+
 app.include_router(auth_router, prefix=settings.API_V1_STR)
+app.include_router(alerts_router, prefix=settings.API_V1_STR)
 
 @app.get("/", tags=["General"])
 def root():
