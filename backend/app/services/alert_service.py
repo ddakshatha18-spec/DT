@@ -8,6 +8,7 @@ from backend.app.models.location import Building, Room
 from backend.app.models.user import User
 from backend.app.schemas.alert import AlertCreate
 from backend.app.services.notification_service import NotificationService
+from backend.app.core.logging import logger
 
 class AlertService:
     @staticmethod
@@ -39,6 +40,26 @@ class AlertService:
     @classmethod
     async def create_alert(cls, db: Session, student: User, alert_in: AlertCreate) -> Alert:
         """Validate location, determine priority, persist alert and trigger notification broadcast."""
+        # 1. Coordinate validation
+        if alert_in.latitude is not None and not (-90.0 <= alert_in.latitude <= 90.0):
+            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Latitude must be between -90 and 90")
+        if alert_in.longitude is not None and not (-180.0 <= alert_in.longitude <= 180.0):
+            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Longitude must be between -180 and 180")
+
+        # 2. Duplicate / rapid tap check: Check if student has an active NEW or ACKNOWLEDGED alert within 45 seconds
+        recent_active = db.query(Alert).filter(
+            Alert.student_id == student.id,
+            Alert.status.in_([AlertStatus.NEW, AlertStatus.ACKNOWLEDGED])
+        ).order_by(Alert.created_at.desc()).first()
+
+        if recent_active:
+            time_diff = (datetime.now(timezone.utc) - recent_active.created_at.replace(tzinfo=timezone.utc)).total_seconds()
+            if time_diff < 45:
+                raise HTTPException(
+                    status_code=status.HTTP_429_TOO_MANY_REQUESTS,
+                    detail=f"An active emergency alert ({recent_active.alert_code}) is already in progress for your account. Campus security responders have been dispatched."
+                )
+
         building = db.query(Building).filter(Building.id == alert_in.building_id).first()
         if not building:
             raise HTTPException(
@@ -86,6 +107,12 @@ class AlertService:
         db.add(history)
         db.commit()
         db.refresh(alert)
+
+        logger.info(
+            f"[ALERT_CREATED] Code={alert.alert_code} Student={student.roll_number} "
+            f"Type='{alert.emergency_type.value}' Priority={alert.priority.value} "
+            f"Building={building.code} Room={alert.room_number}"
+        )
 
         # Broadcast real-time event to Admin Dashboard
         alert_dict = cls.format_alert_response(alert)

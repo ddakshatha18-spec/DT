@@ -5,6 +5,7 @@ from backend.app.models.user import User, WarningLevel
 from backend.app.models.alert import Alert, AlertStatus, AlertStatusHistory
 from backend.app.models.escalation import EscalationLog, AdminAction
 from backend.app.services.notification_service import NotificationService
+from backend.app.core.logging import logger
 
 class EscalationService:
     @classmethod

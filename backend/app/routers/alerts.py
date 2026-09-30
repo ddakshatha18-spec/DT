@@ -42,6 +42,12 @@ async def update_alert_status(
     if not alert:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"Alert with ID {alert_id} not found")
         
+    if alert.status in [AlertStatus.RESOLVED_GENUINE, AlertStatus.RESOLVED_FALSE]:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=f"Alert {alert.alert_code} is already finalized ({alert.status.value}). Closed incidents cannot be re-transitioned."
+        )
+
     result = await EscalationService.process_status_update(
         db=db,
         alert=alert,
