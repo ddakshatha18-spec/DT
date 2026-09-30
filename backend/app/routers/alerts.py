@@ -5,10 +5,12 @@ from sqlalchemy.orm import Session
 from backend.app.core.database import get_db
 from backend.app.models.alert import Alert, AlertStatus, AlertPriority
 from backend.app.models.user import User, UserRole
-from backend.app.schemas.alert import AlertCreate, AlertResponse
+from backend.app.schemas.alert import AlertCreate, AlertResponse, AlertStatusUpdate
+from backend.app.schemas.escalation import StatusUpdateResult
 from backend.app.services.alert_service import AlertService
+from backend.app.services.escalation_service import EscalationService
 from backend.app.services.notification_service import NotificationService
-from backend.app.routers.deps import get_current_user
+from backend.app.routers.deps import get_current_user, require_roles
 
 router = APIRouter(prefix="/alerts", tags=["Emergency Alerts"])
 
@@ -24,6 +26,30 @@ async def submit_alert(
     """
     alert = await AlertService.create_alert(db=db, student=current_user, alert_in=alert_in)
     return AlertService.format_alert_response(alert)
+
+@router.patch("/{alert_id}/status", response_model=StatusUpdateResult)
+async def update_alert_status(
+    alert_id: int,
+    status_in: AlertStatusUpdate,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(require_roles(UserRole.ADMIN, UserRole.HOD))
+) -> Any:
+    """
+    Admin Review Workflow: Update status (ACKNOWLEDGED, RESOLVED_GENUINE, RESOLVED_FALSE, ESCALATED).
+    Automatically triggers progressive escalation policy if marked as RESOLVED_FALSE.
+    """
+    alert = db.query(Alert).filter(Alert.id == alert_id).first()
+    if not alert:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"Alert with ID {alert_id} not found")
+        
+    result = await EscalationService.process_status_update(
+        db=db,
+        alert=alert,
+        admin_user=current_user,
+        new_status=status_in.status,
+        remarks=status_in.remarks
+    )
+    return result
 
 @router.get("/", response_model=list[AlertResponse])
 def list_alerts(
