@@ -7,6 +7,7 @@ from backend.app.schemas.user import UserResponse, UserProfile
 from backend.app.services.auth_service import AuthService
 from backend.app.models.user import User, UserRole
 from backend.app.routers.deps import get_current_user, require_roles
+from backend.app.core.rate_limiter import login_rate_limiter
 
 router = APIRouter(prefix="/auth", tags=["Authentication"])
 
@@ -15,7 +16,10 @@ def login(login_data: LoginRequest, db: Session = Depends(get_db)) -> Any:
     """
     Roll-number based login for Students, Security Desk Admins, and Department HODs.
     Returns Bearer JWT token with user profile and active warning status.
+    Protected by brute-force rate limiter.
     """
+    login_rate_limiter.check(login_data.roll_number.strip().upper())
+    
     user = AuthService.authenticate_user(db, roll_number=login_data.roll_number, password=login_data.password)
     if not user:
         raise HTTPException(
@@ -24,6 +28,13 @@ def login(login_data: LoginRequest, db: Session = Depends(get_db)) -> Any:
             headers={"WWW-Authenticate": "Bearer"},
         )
     return AuthService.create_user_token(user)
+
+@router.post("/refresh", response_model=TokenResponse)
+def refresh_token(current_user: User = Depends(get_current_user)) -> Any:
+    """
+    Renew active session token for continuous dashboard monitoring (Admin / Security desk).
+    """
+    return AuthService.create_user_token(current_user)
 
 @router.get("/me", response_model=UserProfile)
 def get_me(current_user: User = Depends(get_current_user)) -> Any:

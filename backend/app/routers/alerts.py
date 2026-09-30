@@ -12,6 +12,8 @@ from backend.app.services.escalation_service import EscalationService
 from backend.app.services.notification_service import NotificationService
 from backend.app.routers.deps import get_current_user, require_roles
 
+from backend.app.core.rate_limiter import alert_rate_limiter
+
 router = APIRouter(prefix="/alerts", tags=["Emergency Alerts"])
 
 @router.post("/", response_model=AlertResponse, status_code=status.HTTP_201_CREATED)
@@ -23,7 +25,9 @@ async def submit_alert(
     """
     Primary Emergency Submission API (Student App / Panic Button).
     Instantaneous room-level alerting with automatic hazard prioritization and dispatch.
+    Protected by per-user sliding window rate limiter.
     """
+    alert_rate_limiter.check(f"alert_{current_user.roll_number}")
     alert = await AlertService.create_alert(db=db, student=current_user, alert_in=alert_in)
     return AlertService.format_alert_response(alert)
 
