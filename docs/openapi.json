@@ -1,0 +1,1908 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "Campus Emergency Assistance System",
+    "description": "Backend API and Database Services for Campus Emergency Assistance App (P1 Role). Provides roll-number authentication, structured indoor location directory, instantaneous emergency dispatching, alert queue management, and human-in-the-loop escalation logic.",
+    "version": "1.0.0"
+  },
+  "paths": {
+    "/api/auth/login": {
+      "post": {
+        "tags": [
+          "Authentication"
+        ],
+        "summary": "Login",
+        "description": "Roll-number based login for Students, Security Desk Admins, and Department HODs.\nReturns Bearer JWT token with user profile and active warning status.\nProtected by brute-force rate limiter.",
+        "operationId": "login_api_auth_login_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/LoginRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TokenResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/auth/refresh": {
+      "post": {
+        "tags": [
+          "Authentication"
+        ],
+        "summary": "Refresh Token",
+        "description": "Renew active session token for continuous dashboard monitoring (Admin / Security desk).",
+        "operationId": "refresh_token_api_auth_refresh_post",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TokenResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ]
+      }
+    },
+    "/api/auth/me": {
+      "get": {
+        "tags": [
+          "Authentication"
+        ],
+        "summary": "Get Me",
+        "description": "Get the currently authenticated user's profile and offense warning tier.",
+        "operationId": "get_me_api_auth_me_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserProfile"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ]
+      }
+    },
+    "/api/auth/logout": {
+      "post": {
+        "tags": [
+          "Authentication"
+        ],
+        "summary": "Logout",
+        "description": "Logout the authenticated user session.",
+        "operationId": "logout_api_auth_logout_post",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "title": "Response Logout Api Auth Logout Post"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ]
+      }
+    },
+    "/api/auth/users/students": {
+      "get": {
+        "tags": [
+          "Authentication"
+        ],
+        "summary": "List Students",
+        "description": "List all registered students (Admin & HOD access).",
+        "operationId": "list_students_api_auth_users_students_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/UserResponse"
+                  },
+                  "type": "array",
+                  "title": "Response List Students Api Auth Users Students Get"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ]
+      }
+    },
+    "/api/auth/users/{roll_number}": {
+      "get": {
+        "tags": [
+          "Authentication"
+        ],
+        "summary": "Get User By Roll",
+        "description": "Retrieve profile information for a specific roll number.",
+        "operationId": "get_user_by_roll_api_auth_users__roll_number__get",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "roll_number",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Roll Number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/alerts/": {
+      "post": {
+        "tags": [
+          "Emergency Alerts"
+        ],
+        "summary": "Submit Alert",
+        "description": "Primary Emergency Submission API (Student App / Panic Button).\nInstantaneous room-level alerting with automatic hazard prioritization and dispatch.\nProtected by per-user sliding window rate limiter.",
+        "operationId": "submit_alert_api_alerts__post",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AlertCreate"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AlertResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "get": {
+        "tags": [
+          "Emergency Alerts"
+        ],
+        "summary": "List Alerts",
+        "description": "List alerts.\n- Security / Admin / HOD: views complete campus queue.\n- Students: views own alert history.",
+        "operationId": "list_alerts_api_alerts__get",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "status",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "$ref": "#/components/schemas/AlertStatus"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Status"
+            }
+          },
+          {
+            "name": "priority",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "$ref": "#/components/schemas/AlertPriority"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Priority"
+            }
+          },
+          {
+            "name": "building_id",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "integer"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Building Id"
+            }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "maximum": 200,
+              "minimum": 1,
+              "default": 50,
+              "title": "Limit"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/AlertResponse"
+                  },
+                  "title": "Response List Alerts Api Alerts  Get"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/alerts/{alert_id}/status": {
+      "patch": {
+        "tags": [
+          "Emergency Alerts"
+        ],
+        "summary": "Update Alert Status",
+        "description": "Admin Review Workflow: Update status (ACKNOWLEDGED, RESOLVED_GENUINE, RESOLVED_FALSE, ESCALATED).\nAutomatically triggers progressive escalation policy if marked as RESOLVED_FALSE.",
+        "operationId": "update_alert_status_api_alerts__alert_id__status_patch",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "alert_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "title": "Alert Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AlertStatusUpdate"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/StatusUpdateResult"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/alerts/stream": {
+      "get": {
+        "tags": [
+          "Emergency Alerts"
+        ],
+        "summary": "Stream Live Alerts",
+        "description": "Server-Sent Events (SSE) live stream for Admin Dashboard / Security Monitor.\nPushes real-time alerts instantaneously as students tap the emergency button.",
+        "operationId": "stream_live_alerts_api_alerts_stream_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/alerts/{alert_id}": {
+      "get": {
+        "tags": [
+          "Emergency Alerts"
+        ],
+        "summary": "Get Alert Detail",
+        "description": "Retrieve complete metadata and status transition history of a specific alert.",
+        "operationId": "get_alert_detail_api_alerts__alert_id__get",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "alert_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "title": "Alert Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AlertResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/locations/buildings": {
+      "get": {
+        "tags": [
+          "Campus Location Directory"
+        ],
+        "summary": "List Buildings",
+        "description": "Retrieve all campus buildings with floor count and room counts.",
+        "operationId": "list_buildings_api_locations_buildings_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/BuildingSummary"
+                  },
+                  "type": "array",
+                  "title": "Response List Buildings Api Locations Buildings Get"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/locations/buildings/{building_id}": {
+      "get": {
+        "tags": [
+          "Campus Location Directory"
+        ],
+        "summary": "Get Building",
+        "description": "Retrieve a specific building along with all its registered rooms.",
+        "operationId": "get_building_api_locations_buildings__building_id__get",
+        "parameters": [
+          {
+            "name": "building_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "title": "Building Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BuildingResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/locations/buildings/{building_id}/rooms": {
+      "get": {
+        "tags": [
+          "Campus Location Directory"
+        ],
+        "summary": "List Rooms For Building",
+        "description": "Retrieve all rooms within a building, with optional floor filtering.",
+        "operationId": "list_rooms_for_building_api_locations_buildings__building_id__rooms_get",
+        "parameters": [
+          {
+            "name": "building_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "title": "Building Id"
+            }
+          },
+          {
+            "name": "floor",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "integer"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Optional floor filter",
+              "title": "Floor"
+            },
+            "description": "Optional floor filter"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/RoomResponse"
+                  },
+                  "title": "Response List Rooms For Building Api Locations Buildings  Building Id  Rooms Get"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/locations/verify": {
+      "get": {
+        "tags": [
+          "Campus Location Directory"
+        ],
+        "summary": "Verify Location",
+        "description": "Verify that a selected or entered building and room combination is valid.",
+        "operationId": "verify_location_api_locations_verify_get",
+        "parameters": [
+          {
+            "name": "building",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "description": "Building ID or Code, e.g. '1' or 'ENG-A'",
+              "title": "Building"
+            },
+            "description": "Building ID or Code, e.g. '1' or 'ENG-A'"
+          },
+          {
+            "name": "room_number",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "description": "Room Number, e.g. 'LAB-1'",
+              "title": "Room Number"
+            },
+            "description": "Room Number, e.g. 'LAB-1'"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/LocationVerifyResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/locations/search": {
+      "get": {
+        "tags": [
+          "Campus Location Directory"
+        ],
+        "summary": "Search Locations",
+        "description": "Autocomplete search across campus buildings and rooms for rapid selection.",
+        "operationId": "search_locations_api_locations_search_get",
+        "parameters": [
+          {
+            "name": "q",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "minLength": 1,
+              "description": "Search term for building or room",
+              "title": "Q"
+            },
+            "description": "Search term for building or room"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "title": "Response Search Locations Api Locations Search Get"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/escalation/logs": {
+      "get": {
+        "tags": [
+          "Escalation & Accountability"
+        ],
+        "summary": "Get Escalation Logs",
+        "description": "Retrieve full audit log of all progressive escalation events across campus.",
+        "operationId": "get_escalation_logs_api_escalation_logs_get",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "maximum": 100,
+              "minimum": 1,
+              "default": 50,
+              "title": "Limit"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/EscalationLogResponse"
+                  },
+                  "title": "Response Get Escalation Logs Api Escalation Logs Get"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/escalation/student/{roll_number}": {
+      "get": {
+        "tags": [
+          "Escalation & Accountability"
+        ],
+        "summary": "Get Student Escalation",
+        "description": "Retrieve active warning tier and disciplinary incident history for a specific student.",
+        "operationId": "get_student_escalation_api_escalation_student__roll_number__get",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "roll_number",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Roll Number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/StudentEscalationSummary"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/": {
+      "get": {
+        "tags": [
+          "General"
+        ],
+        "summary": "Root",
+        "operationId": "root__get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          }
+        }
+      }
+    },
+    "/health": {
+      "get": {
+        "tags": [
+          "General"
+        ],
+        "summary": "Health Check",
+        "operationId": "health_check_health_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "AlertCreate": {
+        "properties": {
+          "emergency_type": {
+            "$ref": "#/components/schemas/EmergencyType",
+            "description": "Predefined emergency type",
+            "example": "Medical Emergency"
+          },
+          "building_id": {
+            "type": "integer",
+            "title": "Building Id",
+            "description": "ID of campus building",
+            "example": 1
+          },
+          "room_number": {
+            "type": "string",
+            "title": "Room Number",
+            "description": "Room identifier",
+            "example": "LAB-1"
+          },
+          "floor": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Floor",
+            "description": "Building floor (ground=0, 1, 2...)",
+            "example": 1
+          },
+          "description": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Description",
+            "description": "Optional brief context",
+            "example": "Student collapsed near workbench"
+          },
+          "latitude": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Latitude",
+            "description": "Optional GPS latitude",
+            "example": 12.9716
+          },
+          "longitude": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Longitude",
+            "description": "Optional GPS longitude",
+            "example": 77.5946
+          }
+        },
+        "type": "object",
+        "required": [
+          "emergency_type",
+          "building_id",
+          "room_number"
+        ],
+        "title": "AlertCreate"
+      },
+      "AlertPriority": {
+        "type": "string",
+        "enum": [
+          "CRITICAL",
+          "HIGH",
+          "MEDIUM",
+          "LOW"
+        ],
+        "title": "AlertPriority"
+      },
+      "AlertResponse": {
+        "properties": {
+          "id": {
+            "type": "integer",
+            "title": "Id"
+          },
+          "alert_code": {
+            "type": "string",
+            "title": "Alert Code"
+          },
+          "student_id": {
+            "type": "integer",
+            "title": "Student Id"
+          },
+          "student_roll_number": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Student Roll Number"
+          },
+          "student_name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Student Name"
+          },
+          "student_phone": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Student Phone"
+          },
+          "emergency_type": {
+            "$ref": "#/components/schemas/EmergencyType"
+          },
+          "priority": {
+            "$ref": "#/components/schemas/AlertPriority"
+          },
+          "status": {
+            "$ref": "#/components/schemas/AlertStatus"
+          },
+          "building_id": {
+            "type": "integer",
+            "title": "Building Id"
+          },
+          "building_name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Building Name"
+          },
+          "building_code": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Building Code"
+          },
+          "room_number": {
+            "type": "string",
+            "title": "Room Number"
+          },
+          "floor": {
+            "type": "integer",
+            "title": "Floor"
+          },
+          "description": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Description"
+          },
+          "latitude": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Latitude"
+          },
+          "longitude": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Longitude"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Created At"
+          },
+          "updated_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Updated At"
+          },
+          "status_history": {
+            "items": {
+              "$ref": "#/components/schemas/AlertStatusHistoryResponse"
+            },
+            "type": "array",
+            "title": "Status History",
+            "default": []
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "alert_code",
+          "student_id",
+          "emergency_type",
+          "priority",
+          "status",
+          "building_id",
+          "room_number",
+          "floor",
+          "created_at",
+          "updated_at"
+        ],
+        "title": "AlertResponse"
+      },
+      "AlertStatus": {
+        "type": "string",
+        "enum": [
+          "NEW",
+          "ACKNOWLEDGED",
+          "RESOLVED_GENUINE",
+          "RESOLVED_FALSE",
+          "ESCALATED"
+        ],
+        "title": "AlertStatus"
+      },
+      "AlertStatusHistoryResponse": {
+        "properties": {
+          "id": {
+            "type": "integer",
+            "title": "Id"
+          },
+          "previous_status": {
+            "type": "string",
+            "title": "Previous Status"
+          },
+          "new_status": {
+            "type": "string",
+            "title": "New Status"
+          },
+          "changed_by_user_id": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Changed By User Id"
+          },
+          "remarks": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Remarks"
+          },
+          "timestamp": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Timestamp"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "previous_status",
+          "new_status",
+          "changed_by_user_id",
+          "remarks",
+          "timestamp"
+        ],
+        "title": "AlertStatusHistoryResponse"
+      },
+      "AlertStatusUpdate": {
+        "properties": {
+          "status": {
+            "$ref": "#/components/schemas/AlertStatus",
+            "description": "Target status: ACKNOWLEDGED, RESOLVED_GENUINE, RESOLVED_FALSE, ESCALATED"
+          },
+          "remarks": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Remarks",
+            "description": "Review remarks or notes",
+            "example": "Medical team dispatched to room"
+          }
+        },
+        "type": "object",
+        "required": [
+          "status"
+        ],
+        "title": "AlertStatusUpdate"
+      },
+      "BuildingResponse": {
+        "properties": {
+          "id": {
+            "type": "integer",
+            "title": "Id"
+          },
+          "code": {
+            "type": "string",
+            "title": "Code"
+          },
+          "name": {
+            "type": "string",
+            "title": "Name"
+          },
+          "description": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Description"
+          },
+          "total_floors": {
+            "type": "integer",
+            "title": "Total Floors"
+          },
+          "rooms": {
+            "items": {
+              "$ref": "#/components/schemas/RoomResponse"
+            },
+            "type": "array",
+            "title": "Rooms",
+            "default": []
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "code",
+          "name",
+          "total_floors"
+        ],
+        "title": "BuildingResponse"
+      },
+      "BuildingSummary": {
+        "properties": {
+          "id": {
+            "type": "integer",
+            "title": "Id"
+          },
+          "code": {
+            "type": "string",
+            "title": "Code"
+          },
+          "name": {
+            "type": "string",
+            "title": "Name"
+          },
+          "description": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Description"
+          },
+          "total_floors": {
+            "type": "integer",
+            "title": "Total Floors"
+          },
+          "room_count": {
+            "type": "integer",
+            "title": "Room Count",
+            "default": 0
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "code",
+          "name",
+          "total_floors"
+        ],
+        "title": "BuildingSummary"
+      },
+      "EmergencyType": {
+        "type": "string",
+        "enum": [
+          "Fall / Injury",
+          "Medical Emergency",
+          "Accident",
+          "Fire / Smoke",
+          "Harassment / Threat",
+          "Fainting / Unconsciousness",
+          "Other Emergency"
+        ],
+        "title": "EmergencyType"
+      },
+      "EscalationLogResponse": {
+        "properties": {
+          "id": {
+            "type": "integer",
+            "title": "Id"
+          },
+          "student_id": {
+            "type": "integer",
+            "title": "Student Id"
+          },
+          "student_roll_number": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Student Roll Number"
+          },
+          "student_name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Student Name"
+          },
+          "alert_id": {
+            "type": "integer",
+            "title": "Alert Id"
+          },
+          "alert_code": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Alert Code"
+          },
+          "offense_number": {
+            "type": "integer",
+            "title": "Offense Number"
+          },
+          "warning_level": {
+            "$ref": "#/components/schemas/WarningLevel"
+          },
+          "action_taken": {
+            "type": "string",
+            "title": "Action Taken"
+          },
+          "remarks": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Remarks"
+          },
+          "timestamp": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Timestamp"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "student_id",
+          "alert_id",
+          "offense_number",
+          "warning_level",
+          "action_taken",
+          "timestamp"
+        ],
+        "title": "EscalationLogResponse"
+      },
+      "HTTPValidationError": {
+        "properties": {
+          "detail": {
+            "items": {
+              "$ref": "#/components/schemas/ValidationError"
+            },
+            "type": "array",
+            "title": "Detail"
+          }
+        },
+        "type": "object",
+        "title": "HTTPValidationError"
+      },
+      "LocationVerifyResponse": {
+        "properties": {
+          "valid": {
+            "type": "boolean",
+            "title": "Valid"
+          },
+          "building_id": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Building Id"
+          },
+          "building_name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Building Name"
+          },
+          "building_code": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Building Code"
+          },
+          "room_number": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Room Number"
+          },
+          "floor": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Floor"
+          },
+          "wing": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Wing"
+          },
+          "room_type": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Room Type"
+          },
+          "message": {
+            "type": "string",
+            "title": "Message"
+          }
+        },
+        "type": "object",
+        "required": [
+          "valid",
+          "message"
+        ],
+        "title": "LocationVerifyResponse"
+      },
+      "LoginRequest": {
+        "properties": {
+          "roll_number": {
+            "type": "string",
+            "title": "Roll Number",
+            "description": "Student roll number or Staff/Admin ID, e.g. '21CS001' or 'ADMIN01'",
+            "example": "21CS001"
+          },
+          "password": {
+            "type": "string",
+            "title": "Password",
+            "description": "Password for authentication",
+            "example": "emergency123"
+          }
+        },
+        "type": "object",
+        "required": [
+          "roll_number",
+          "password"
+        ],
+        "title": "LoginRequest"
+      },
+      "RoomResponse": {
+        "properties": {
+          "id": {
+            "type": "integer",
+            "title": "Id"
+          },
+          "building_id": {
+            "type": "integer",
+            "title": "Building Id"
+          },
+          "room_number": {
+            "type": "string",
+            "title": "Room Number"
+          },
+          "floor": {
+            "type": "integer",
+            "title": "Floor"
+          },
+          "wing": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Wing"
+          },
+          "room_type": {
+            "type": "string",
+            "title": "Room Type"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "building_id",
+          "room_number",
+          "floor",
+          "room_type"
+        ],
+        "title": "RoomResponse"
+      },
+      "StatusUpdateResult": {
+        "properties": {
+          "alert_id": {
+            "type": "integer",
+            "title": "Alert Id"
+          },
+          "alert_code": {
+            "type": "string",
+            "title": "Alert Code"
+          },
+          "previous_status": {
+            "type": "string",
+            "title": "Previous Status"
+          },
+          "new_status": {
+            "type": "string",
+            "title": "New Status"
+          },
+          "escalation_triggered": {
+            "type": "boolean",
+            "title": "Escalation Triggered"
+          },
+          "escalation_details": {
+            "anyOf": [
+              {
+                "additionalProperties": true,
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Escalation Details"
+          },
+          "message": {
+            "type": "string",
+            "title": "Message"
+          }
+        },
+        "type": "object",
+        "required": [
+          "alert_id",
+          "alert_code",
+          "previous_status",
+          "new_status",
+          "escalation_triggered",
+          "message"
+        ],
+        "title": "StatusUpdateResult"
+      },
+      "StudentEscalationSummary": {
+        "properties": {
+          "roll_number": {
+            "type": "string",
+            "title": "Roll Number"
+          },
+          "full_name": {
+            "type": "string",
+            "title": "Full Name"
+          },
+          "department": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Department"
+          },
+          "offense_count": {
+            "type": "integer",
+            "title": "Offense Count"
+          },
+          "warning_status": {
+            "$ref": "#/components/schemas/WarningLevel"
+          },
+          "escalation_history": {
+            "items": {
+              "$ref": "#/components/schemas/EscalationLogResponse"
+            },
+            "type": "array",
+            "title": "Escalation History",
+            "default": []
+          }
+        },
+        "type": "object",
+        "required": [
+          "roll_number",
+          "full_name",
+          "offense_count",
+          "warning_status"
+        ],
+        "title": "StudentEscalationSummary"
+      },
+      "TokenResponse": {
+        "properties": {
+          "access_token": {
+            "type": "string",
+            "title": "Access Token"
+          },
+          "token_type": {
+            "type": "string",
+            "title": "Token Type",
+            "default": "bearer"
+          },
+          "user": {
+            "additionalProperties": true,
+            "type": "object",
+            "title": "User"
+          }
+        },
+        "type": "object",
+        "required": [
+          "access_token",
+          "user"
+        ],
+        "title": "TokenResponse"
+      },
+      "UserProfile": {
+        "properties": {
+          "roll_number": {
+            "type": "string",
+            "title": "Roll Number"
+          },
+          "full_name": {
+            "type": "string",
+            "title": "Full Name"
+          },
+          "email": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Email"
+          },
+          "phone": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Phone"
+          },
+          "role": {
+            "$ref": "#/components/schemas/UserRole"
+          },
+          "department": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Department"
+          },
+          "id": {
+            "type": "integer",
+            "title": "Id"
+          },
+          "offense_count": {
+            "type": "integer",
+            "title": "Offense Count"
+          },
+          "warning_status": {
+            "$ref": "#/components/schemas/WarningLevel"
+          },
+          "is_active": {
+            "type": "boolean",
+            "title": "Is Active"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Created At"
+          }
+        },
+        "type": "object",
+        "required": [
+          "roll_number",
+          "full_name",
+          "role",
+          "id",
+          "offense_count",
+          "warning_status",
+          "is_active",
+          "created_at"
+        ],
+        "title": "UserProfile"
+      },
+      "UserResponse": {
+        "properties": {
+          "roll_number": {
+            "type": "string",
+            "title": "Roll Number"
+          },
+          "full_name": {
+            "type": "string",
+            "title": "Full Name"
+          },
+          "email": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Email"
+          },
+          "phone": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Phone"
+          },
+          "role": {
+            "$ref": "#/components/schemas/UserRole"
+          },
+          "department": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Department"
+          },
+          "id": {
+            "type": "integer",
+            "title": "Id"
+          },
+          "offense_count": {
+            "type": "integer",
+            "title": "Offense Count"
+          },
+          "warning_status": {
+            "$ref": "#/components/schemas/WarningLevel"
+          },
+          "is_active": {
+            "type": "boolean",
+            "title": "Is Active"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Created At"
+          }
+        },
+        "type": "object",
+        "required": [
+          "roll_number",
+          "full_name",
+          "role",
+          "id",
+          "offense_count",
+          "warning_status",
+          "is_active",
+          "created_at"
+        ],
+        "title": "UserResponse"
+      },
+      "UserRole": {
+        "type": "string",
+        "enum": [
+          "student",
+          "admin",
+          "hod"
+        ],
+        "title": "UserRole"
+      },
+      "ValidationError": {
+        "properties": {
+          "loc": {
+            "items": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "integer"
+                }
+              ]
+            },
+            "type": "array",
+            "title": "Location"
+          },
+          "msg": {
+            "type": "string",
+            "title": "Message"
+          },
+          "type": {
+            "type": "string",
+            "title": "Error Type"
+          }
+        },
+        "type": "object",
+        "required": [
+          "loc",
+          "msg",
+          "type"
+        ],
+        "title": "ValidationError"
+      },
+      "WarningLevel": {
+        "type": "string",
+        "enum": [
+          "none",
+          "warning",
+          "strong_warning",
+          "referred_to_higher_authority"
+        ],
+        "title": "WarningLevel"
+      }
+    },
+    "securitySchemes": {
+      "HTTPBearer": {
+        "type": "http",
+        "scheme": "bearer"
+      }
+    }
+  }
+}
