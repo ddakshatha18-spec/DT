@@ -26,6 +26,9 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+from backend.app.routers.auth import router as auth_router
+app.include_router(auth_router, prefix=settings.API_V1_STR)
+
 @app.get("/", tags=["General"])
 def root():
     return {
