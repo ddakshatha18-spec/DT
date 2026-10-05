@@ -1,0 +1,179 @@
+{
+  "project": "Campus Emergency Assistance System",
+  "qa_module": "P3 - Alert Queue & QA",
+  "scenarios_version": "1.0",
+  "emergency_scenarios": [
+    {
+      "id": "SCENARIO-01",
+      "name": "Major Chemical Spill & Toxic Fumes",
+      "hazard_type": "Fire / Smoke",
+      "priority": "CRITICAL",
+      "location": {
+        "building_code": "SCI-MAIN",
+        "building_id": 3,
+        "room_number": "G02",
+        "floor": 0,
+        "wing": "Ground"
+      },
+      "reporting_student": {
+        "roll_number": "21CS042",
+        "name": "Priya Patel",
+        "phone": "+91-9876543211"
+      },
+      "description": "Acid bottle shattered, intense pungent fumes spreading across ground floor hallway",
+      "expected_dispatch": ["Hazardous Material Team", "Campus Health Center", "Fire Safety Squad"],
+      "expected_status_flow": ["NEW", "ACKNOWLEDGED", "RESOLVED_GENUINE"]
+    },
+    {
+      "id": "SCENARIO-02",
+      "name": "Server Rack Electrical Fire",
+      "hazard_type": "Fire / Smoke",
+      "priority": "CRITICAL",
+      "location": {
+        "building_code": "ENG-A",
+        "building_id": 1,
+        "room_number": "LAB-DATA",
+        "floor": 0,
+        "wing": "West"
+      },
+      "reporting_student": {
+        "roll_number": "21CS001",
+        "name": "Aarav Sharma",
+        "phone": "+91-9876543210"
+      },
+      "description": "High temperature alarm sounding, electrical sparks and dense black smoke from rack 3",
+      "expected_dispatch": ["Electrical Maintenance", "Fire Brigade", "Security Control"],
+      "expected_status_flow": ["NEW", "ACKNOWLEDGED", "RESOLVED_GENUINE"]
+    },
+    {
+      "id": "SCENARIO-03",
+      "name": "Sudden Syncope / Collapse in Reading Hall",
+      "hazard_type": "Medical Emergency",
+      "priority": "CRITICAL",
+      "location": {
+        "building_code": "LIB",
+        "building_id": 4,
+        "room_number": "G-READING",
+        "floor": 0,
+        "wing": "Ground"
+      },
+      "reporting_student": {
+        "roll_number": "22EC015",
+        "name": "Rohan Verma",
+        "phone": "+91-9876543212"
+      },
+      "description": "Student suddenly lost consciousness and fell from study desk, shallow breathing",
+      "expected_dispatch": ["Ambulance Service", "Paramedic Attendant", "Library Warden"],
+      "expected_status_flow": ["NEW", "ACKNOWLEDGED", "RESOLVED_GENUINE"]
+    },
+    {
+      "id": "SCENARIO-04",
+      "name": "Late Night Perimeter Harassment",
+      "hazard_type": "Harassment / Threat",
+      "priority": "CRITICAL",
+      "location": {
+        "building_code": "HST-GIRLS",
+        "building_id": 7,
+        "room_number": "G-COMMON",
+        "floor": 0,
+        "wing": "Ground"
+      },
+      "reporting_student": {
+        "roll_number": "23CV004",
+        "name": "Ananya Sen",
+        "phone": "+91-9876543214"
+      },
+      "description": "Unidentified individual trespassing near hostel ground windows, shouting aggressive threats",
+      "expected_dispatch": ["Rapid Response Guard Patrol", "Hostel Warden", "Police Liaison"],
+      "expected_status_flow": ["NEW", "ACKNOWLEDGED", "RESOLVED_GENUINE"]
+    },
+    {
+      "id": "SCENARIO-05",
+      "name": "Workshop Heavy Machinery Injury",
+      "hazard_type": "Accident",
+      "priority": "HIGH",
+      "location": {
+        "building_code": "ENG-B",
+        "building_id": 2,
+        "room_number": "WORKSHOP-1",
+        "floor": 0,
+        "wing": "Main"
+      },
+      "reporting_student": {
+        "roll_number": "22ME009",
+        "name": "Vikram Singh",
+        "phone": "+91-9876543213"
+      },
+      "description": "Hand laceration while operating lathe machine, bleeding profusely",
+      "expected_dispatch": ["Campus First Aid Clinic", "Department Safety Officer"],
+      "expected_status_flow": ["NEW", "ACKNOWLEDGED", "RESOLVED_GENUINE"]
+    },
+    {
+      "id": "SCENARIO-06",
+      "name": "Staircase Slip and Ankle Sprain",
+      "hazard_type": "Fall / Injury",
+      "priority": "MEDIUM",
+      "location": {
+        "building_code": "ENG-A",
+        "building_id": 1,
+        "room_number": "101",
+        "floor": 1,
+        "wing": "East"
+      },
+      "reporting_student": {
+        "roll_number": "21CS001",
+        "name": "Aarav Sharma",
+        "phone": "+91-9876543210"
+      },
+      "description": "Slipped on wet floor near staircase landing, unable to stand",
+      "expected_dispatch": ["Wheelchair Support", "First Aid Attendant"],
+      "expected_status_flow": ["NEW", "ACKNOWLEDGED", "RESOLVED_GENUINE"]
+    },
+    {
+      "id": "SCENARIO-07",
+      "name": "Accidental Pocket Activation (False Alarm)",
+      "hazard_type": "Other Emergency",
+      "priority": "MEDIUM",
+      "location": {
+        "building_code": "SCI-MAIN",
+        "building_id": 3,
+        "room_number": "101",
+        "floor": 1,
+        "wing": "North"
+      },
+      "reporting_student": {
+        "roll_number": "23CV004",
+        "name": "Ananya Sen",
+        "phone": "+91-9876543214"
+      },
+      "description": "No emergency observed upon guard arrival, phone was in backpack pocket",
+      "expected_dispatch": ["Floor Guard Verification"],
+      "expected_status_flow": ["NEW", "ACKNOWLEDGED", "RESOLVED_FALSE"],
+      "triggers_escalation": true,
+      "expected_warning_level": "warning"
+    },
+    {
+      "id": "SCENARIO-08",
+      "name": "Persistent Prank Alert (Disciplinary Referral)",
+      "hazard_type": "Other Emergency",
+      "priority": "MEDIUM",
+      "location": {
+        "building_code": "HST-BOYS",
+        "building_id": 6,
+        "room_number": "B-204",
+        "floor": 2,
+        "wing": "Block 1"
+      },
+      "reporting_student": {
+        "roll_number": "22ME009",
+        "name": "Vikram Singh",
+        "phone": "+91-9876543213"
+      },
+      "description": "Deliberate 3rd false alarm during late hours disrupting hostel security",
+      "expected_dispatch": ["Chief Security Officer"],
+      "expected_status_flow": ["NEW", "ACKNOWLEDGED", "RESOLVED_FALSE"],
+      "triggers_escalation": true,
+      "expected_warning_level": "referred_to_higher_authority"
+    }
+  ]
+}

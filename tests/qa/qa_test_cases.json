@@ -1,0 +1,126 @@
+{
+  "qa_suite_name": "Campus Emergency Assistance QA Test Matrix",
+  "version": "1.0",
+  "maintainer": "P3 - Alert Queue & QA",
+  "test_cases": [
+    {
+      "test_id": "TC-AUTH-01",
+      "category": "Authentication",
+      "title": "Valid Student Roll-Number Login",
+      "precondition": "Student 21CS001 is registered in database",
+      "method": "POST",
+      "endpoint": "/api/auth/login",
+      "payload": { "roll_number": "21CS001", "password": "emergency123" },
+      "expected_status": 200,
+      "acceptance_criteria": "Response contains access_token and user object with role 'student'"
+    },
+    {
+      "test_id": "TC-AUTH-02",
+      "category": "Authentication",
+      "title": "Invalid Password Authentication Rejection",
+      "precondition": "User exists in database",
+      "method": "POST",
+      "endpoint": "/api/auth/login",
+      "payload": { "roll_number": "21CS001", "password": "wrong_password" },
+      "expected_status": 401,
+      "acceptance_criteria": "HTTP 401 Unauthorized with detail message 'Invalid roll number or password'"
+    },
+    {
+      "test_id": "TC-LOC-01",
+      "category": "Location Directory",
+      "title": "Campus Building & Room Verification Valid",
+      "precondition": "Engineering Block A and LAB-1 exist in master dataset",
+      "method": "GET",
+      "endpoint": "/api/locations/verify?building=ENG-A&room_number=LAB-1",
+      "payload": null,
+      "expected_status": 200,
+      "acceptance_criteria": "Response indicates valid=true, floor=1, wing='West', room_type='Computer Lab'"
+    },
+    {
+      "test_id": "TC-LOC-02",
+      "category": "Location Directory",
+      "title": "Unregistered Room Verification Rejection",
+      "precondition": "Room 999 does not exist in ENG-A",
+      "method": "GET",
+      "endpoint": "/api/locations/verify?building=ENG-A&room_number=ROOM_999",
+      "payload": null,
+      "expected_status": 200,
+      "acceptance_criteria": "Response indicates valid=false with descriptive message"
+    },
+    {
+      "test_id": "TC-ALERT-01",
+      "category": "Emergency Submission",
+      "title": "Critical Hazard Priority Engine Validation",
+      "precondition": "Student authenticated",
+      "method": "POST",
+      "endpoint": "/api/alerts/",
+      "payload": {
+        "emergency_type": "Fire / Smoke",
+        "building_id": 1,
+        "room_number": "LAB-1",
+        "description": "Thick smoke"
+      },
+      "expected_status": 201,
+      "acceptance_criteria": "Alert created with priority='CRITICAL', status='NEW', and unique code ALT-..."
+    },
+    {
+      "test_id": "TC-ALERT-02",
+      "category": "Emergency Submission",
+      "title": "Duplicate Alert Debounce Cooldown (45s)",
+      "precondition": "Student 21CS001 has active NEW alert submitted 5s ago",
+      "method": "POST",
+      "endpoint": "/api/alerts/",
+      "payload": {
+        "emergency_type": "Fire / Smoke",
+        "building_id": 1,
+        "room_number": "LAB-1"
+      },
+      "expected_status": 429,
+      "acceptance_criteria": "HTTP 429 Too Many Requests informing that emergency response is already in progress"
+    },
+    {
+      "test_id": "TC-REVIEW-01",
+      "category": "Admin Review",
+      "title": "Security Desk Acknowledge Alert",
+      "precondition": "Admin authenticated, alert in status 'NEW'",
+      "method": "PATCH",
+      "endpoint": "/api/alerts/{id}/status",
+      "payload": { "status": "ACKNOWLEDGED", "remarks": "Officers dispatched" },
+      "expected_status": 200,
+      "acceptance_criteria": "Alert status transitions to 'ACKNOWLEDGED' and creates status history entry"
+    },
+    {
+      "test_id": "TC-ESC-01",
+      "category": "Escalation Policy",
+      "title": "Tier 1 False Alarm Warning",
+      "precondition": "Alert submitted by student with 0 previous offenses",
+      "method": "PATCH",
+      "endpoint": "/api/alerts/{id}/status",
+      "payload": { "status": "RESOLVED_FALSE", "remarks": "Prank call" },
+      "expected_status": 200,
+      "acceptance_criteria": "escalation_triggered=true, offense_number=1, warning_level='warning'"
+    },
+    {
+      "test_id": "TC-ESC-02",
+      "category": "Escalation Policy",
+      "title": "Tier 3 False Alarm Higher Authority Referral",
+      "precondition": "Student with 2 previous false alerts commits 3rd offense",
+      "method": "PATCH",
+      "endpoint": "/api/alerts/{id}/status",
+      "payload": { "status": "RESOLVED_FALSE", "remarks": "Persistent prank" },
+      "expected_status": 200,
+      "acceptance_criteria": "offense_number=3, warning_level='referred_to_higher_authority'"
+    },
+    {
+      "test_id": "TC-SEC-01",
+      "category": "Security & RBAC",
+      "title": "Student Forbidden from Review Actions",
+      "precondition": "Student authenticated",
+      "method": "PATCH",
+      "endpoint": "/api/alerts/1/status",
+      "payload": { "status": "RESOLVED_GENUINE" },
+      "expected_status": 403,
+      "acceptance_criteria": "HTTP 403 Forbidden with message 'Operation not permitted'"
+    }
+  ]
+}
