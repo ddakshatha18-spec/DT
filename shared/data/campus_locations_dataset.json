@@ -1,0 +1,276 @@
+{
+  "campus_name": "Main University Campus",
+  "campus_code": "MUC",
+  "coordinates": {
+    "center_lat": 12.9716,
+    "center_lng": 77.5946,
+    "bounds": {
+      "north": 12.9750,
+      "south": 12.9680,
+      "east": 77.5990,
+      "west": 77.5910
+    }
+  },
+  "emergency_contacts": {
+    "security_control_room": "+91-9876500001",
+    "campus_health_center": "+91-9876500002",
+    "fire_safety_officer": "+91-9876500003",
+    "ambulance_hotline": "108"
+  },
+  "buildings": [
+    {
+      "id": 1,
+      "code": "ENG-A",
+      "name": "Engineering Block A",
+      "category": "Academic",
+      "total_floors": 4,
+      "description": "Computer Science & Engineering, Information Technology, AI/ML Labs",
+      "coordinates": { "lat": 12.9725, "lng": 77.5935 },
+      "evacuation_assembly_point": "North Lawn Assembly Point A",
+      "nearest_security_post": "Gate 2 Security Booth",
+      "floors": [
+        {
+          "floor_number": 0,
+          "name": "Ground Floor",
+          "rooms": [
+            { "room_number": "G01", "wing": "East", "room_type": "Classroom", "capacity": 60, "nearest_exit": "East Ground Exit", "fire_extinguisher_id": "FE-EA-G01" },
+            { "room_number": "G02", "wing": "East", "room_type": "Classroom", "capacity": 60, "nearest_exit": "East Ground Exit", "fire_extinguisher_id": "FE-EA-G02" },
+            { "room_number": "LAB-DATA", "wing": "West", "room_type": "Computer Lab", "capacity": 45, "nearest_exit": "West Main Exit", "fire_extinguisher_id": "FE-EA-G03" },
+            { "room_number": "CAFETERIA", "wing": "South", "room_type": "Cafeteria", "capacity": 120, "nearest_exit": "South Yard Exit", "fire_extinguisher_id": "FE-EA-G04" }
+          ]
+        },
+        {
+          "floor_number": 1,
+          "name": "First Floor",
+          "rooms": [
+            { "room_number": "101", "wing": "East", "room_type": "Classroom", "capacity": 70, "nearest_exit": "Stairwell 1 (East)", "fire_extinguisher_id": "FE-EA-101" },
+            { "room_number": "102", "wing": "East", "room_type": "Classroom", "capacity": 70, "nearest_exit": "Stairwell 1 (East)", "fire_extinguisher_id": "FE-EA-102" },
+            { "room_number": "LAB-1", "wing": "West", "room_type": "Computer Lab", "capacity": 50, "nearest_exit": "Stairwell 2 (West)", "fire_extinguisher_id": "FE-EA-103" },
+            { "room_number": "HOD-CSE", "wing": "North", "room_type": "Faculty Room", "capacity": 10, "nearest_exit": "Central Elevator Lobby", "fire_extinguisher_id": "FE-EA-104" }
+          ]
+        },
+        {
+          "floor_number": 2,
+          "name": "Second Floor",
+          "rooms": [
+            { "room_number": "201", "wing": "East", "room_type": "Seminar Hall", "capacity": 120, "nearest_exit": "Stairwell 1 (East)", "fire_extinguisher_id": "FE-EA-201" },
+            { "room_number": "205", "wing": "West", "room_type": "Faculty Room", "capacity": 15, "nearest_exit": "Stairwell 2 (West)", "fire_extinguisher_id": "FE-EA-202" },
+            { "room_number": "LAB-CLOUD", "wing": "West", "room_type": "Computer Lab", "capacity": 50, "nearest_exit": "Stairwell 2 (West)", "fire_extinguisher_id": "FE-EA-203" }
+          ]
+        },
+        {
+          "floor_number": 3,
+          "name": "Third Floor",
+          "rooms": [
+            { "room_number": "301", "wing": "East", "room_type": "IoT & Embedded Lab", "capacity": 40, "nearest_exit": "Stairwell 1 (East)", "fire_extinguisher_id": "FE-EA-301" },
+            { "room_number": "304", "wing": "West", "room_type": "Project Lab", "capacity": 35, "nearest_exit": "Stairwell 2 (West)", "fire_extinguisher_id": "FE-EA-302" }
+          ]
+        }
+      ]
+    },
+    {
+      "id": 2,
+      "code": "ENG-B",
+      "name": "Engineering Block B",
+      "category": "Academic",
+      "total_floors": 4,
+      "description": "Mechanical, Civil & Robotics Engineering Departments",
+      "coordinates": { "lat": 12.9732, "lng": 77.5942 },
+      "evacuation_assembly_point": "Central Quadrangle Assembly Point",
+      "nearest_security_post": "Workshop Guard Desk",
+      "floors": [
+        {
+          "floor_number": 0,
+          "name": "Ground Floor",
+          "rooms": [
+            { "room_number": "WORKSHOP-1", "wing": "Main", "room_type": "Workshop", "capacity": 60, "nearest_exit": "Heavy Machinery Roll-up Door", "fire_extinguisher_id": "FE-EB-G01" },
+            { "room_number": "G05", "wing": "Main", "room_type": "Classroom", "capacity": 55, "nearest_exit": "Main West Exit", "fire_extinguisher_id": "FE-EB-G02" }
+          ]
+        },
+        {
+          "floor_number": 1,
+          "name": "First Floor",
+          "rooms": [
+            { "room_number": "101", "wing": "Main", "room_type": "Mechanics Lab", "capacity": 45, "nearest_exit": "Stairwell North", "fire_extinguisher_id": "FE-EB-101" },
+            { "room_number": "102", "wing": "Main", "room_type": "Classroom", "capacity": 60, "nearest_exit": "Stairwell South", "fire_extinguisher_id": "FE-EB-102" }
+          ]
+        },
+        {
+          "floor_number": 2,
+          "name": "Second Floor",
+          "rooms": [
+            { "room_number": "201", "wing": "Main", "room_type": "Robotics Lab", "capacity": 40, "nearest_exit": "Stairwell North", "fire_extinguisher_id": "FE-EB-201" },
+            { "room_number": "202", "wing": "Main", "room_type": "CAD/CAM Studio", "capacity": 40, "nearest_exit": "Stairwell South", "fire_extinguisher_id": "FE-EB-202" }
+          ]
+        },
+        {
+          "floor_number": 3,
+          "name": "Third Floor",
+          "rooms": [
+            { "room_number": "301", "wing": "Main", "room_type": "Classroom", "capacity": 60, "nearest_exit": "Stairwell North", "fire_extinguisher_id": "FE-EB-301" },
+            { "room_number": "305", "wing": "Main", "room_type": "Faculty Cabins", "capacity": 20, "nearest_exit": "Stairwell South", "fire_extinguisher_id": "FE-EB-302" }
+          ]
+        }
+      ]
+    },
+    {
+      "id": 3,
+      "code": "SCI-MAIN",
+      "name": "Science & Humanities Block",
+      "category": "Academic",
+      "total_floors": 3,
+      "description": "Physics, Chemistry, Life Sciences, Mathematics and Environmental Sciences",
+      "coordinates": { "lat": 12.9712, "lng": 77.5955 },
+      "evacuation_assembly_point": "Botanical Garden Assembly Point",
+      "nearest_security_post": "Gate 1 Main Guard Post",
+      "floors": [
+        {
+          "floor_number": 0,
+          "name": "Ground Floor",
+          "rooms": [
+            { "room_number": "G01", "wing": "Ground", "room_type": "Physics Lab", "capacity": 45, "nearest_exit": "Ground East Porch", "fire_extinguisher_id": "FE-SC-G01" },
+            { "room_number": "G02", "wing": "Ground", "room_type": "Chemistry Lab", "capacity": 45, "nearest_exit": "Chemical Emergency Shower Exit", "fire_extinguisher_id": "FE-SC-G02" }
+          ]
+        },
+        {
+          "floor_number": 1,
+          "name": "First Floor",
+          "rooms": [
+            { "room_number": "101", "wing": "North", "room_type": "Lecture Hall 1", "capacity": 100, "nearest_exit": "North Staircase", "fire_extinguisher_id": "FE-SC-101" },
+            { "room_number": "102", "wing": "South", "room_type": "Lecture Hall 2", "capacity": 100, "nearest_exit": "South Staircase", "fire_extinguisher_id": "FE-SC-102" }
+          ]
+        },
+        {
+          "floor_number": 2,
+          "name": "Second Floor",
+          "rooms": [
+            { "room_number": "201", "wing": "North", "room_type": "Math Department", "capacity": 25, "nearest_exit": "North Staircase", "fire_extinguisher_id": "FE-SC-201" }
+          ]
+        }
+      ]
+    },
+    {
+      "id": 4,
+      "code": "LIB",
+      "name": "Central Campus Library",
+      "category": "Facility",
+      "total_floors": 2,
+      "description": "Multi-tier University Library, Silent Study Hub, Digital Archives",
+      "coordinates": { "lat": 12.9705, "lng": 77.5938 },
+      "evacuation_assembly_point": "Library Courtyard",
+      "nearest_security_post": "Library Turnstile Security Desk",
+      "floors": [
+        {
+          "floor_number": 0,
+          "name": "Ground Floor",
+          "rooms": [
+            { "room_number": "G-READING", "wing": "Ground", "room_type": "General Reading Hall", "capacity": 200, "nearest_exit": "Main Double Glass Exit", "fire_extinguisher_id": "FE-LB-G01" },
+            { "room_number": "PERIODICALS", "wing": "West", "room_type": "Periodicals Section", "capacity": 50, "nearest_exit": "Emergency Fire Exit West", "fire_extinguisher_id": "FE-LB-G02" }
+          ]
+        },
+        {
+          "floor_number": 1,
+          "name": "First Floor",
+          "rooms": [
+            { "room_number": "101-DIGITAL", "wing": "First", "room_type": "Digital Library", "capacity": 80, "nearest_exit": "Spiral Stairwell Exit", "fire_extinguisher_id": "FE-LB-101" },
+            { "room_number": "RESEARCH-PODS", "wing": "North", "room_type": "Research Pods", "capacity": 24, "nearest_exit": "North Stairwell Exit", "fire_extinguisher_id": "FE-LB-102" }
+          ]
+        }
+      ]
+    },
+    {
+      "id": 5,
+      "code": "ADM",
+      "name": "Administrative Building",
+      "category": "Administration",
+      "total_floors": 3,
+      "description": "Vice-Chancellor, Registrar, Dean of Student Affairs, Security Headquarters",
+      "coordinates": { "lat": 12.9718, "lng": 77.5922 },
+      "evacuation_assembly_point": "Flagpole Circle Lawn",
+      "nearest_security_post": "Central Campus Security Headquarters",
+      "floors": [
+        {
+          "floor_number": 0,
+          "name": "Ground Floor",
+          "rooms": [
+            { "room_number": "SEC-DESK", "wing": "Main Gate", "room_type": "Security Control Room", "capacity": 20, "nearest_exit": "Direct Outside Access", "fire_extinguisher_id": "FE-AD-G01" },
+            { "room_number": "MED-AID", "wing": "Ground", "room_type": "Campus First Aid Center", "capacity": 15, "nearest_exit": "Ambulance Bay Ramp", "fire_extinguisher_id": "FE-AD-G02" }
+          ]
+        },
+        {
+          "floor_number": 1,
+          "name": "First Floor",
+          "rooms": [
+            { "room_number": "DEAN-OFFICE", "wing": "East", "room_type": "Dean Student Welfare", "capacity": 12, "nearest_exit": "East Grand Staircase", "fire_extinguisher_id": "FE-AD-101" },
+            { "room_number": "REGISTRAR", "wing": "West", "room_type": "Registrar Office", "capacity": 10, "nearest_exit": "West Staircase", "fire_extinguisher_id": "FE-AD-102" }
+          ]
+        },
+        {
+          "floor_number": 2,
+          "name": "Second Floor",
+          "rooms": [
+            { "room_number": "BOARD-ROOM", "wing": "North", "room_type": "Executive Council Boardroom", "capacity": 35, "nearest_exit": "Main Staircase", "fire_extinguisher_id": "FE-AD-201" }
+          ]
+        }
+      ]
+    },
+    {
+      "id": 6,
+      "code": "HST-BOYS",
+      "name": "Boys Hostel Block",
+      "category": "Residential",
+      "total_floors": 5,
+      "description": "Student Residential Block 1 with Warden Office and Dining Hall",
+      "coordinates": { "lat": 12.9692, "lng": 77.5950 },
+      "evacuation_assembly_point": "Hostel 1 Football Field",
+      "nearest_security_post": "Hostel 1 Gate Security",
+      "floors": [
+        {
+          "floor_number": 0,
+          "name": "Ground Floor",
+          "rooms": [
+            { "room_number": "B-COMMON", "wing": "Ground", "room_type": "Common Hall", "capacity": 80, "nearest_exit": "Main Entrance Gate", "fire_extinguisher_id": "FE-HB-G01" },
+            { "room_number": "WARDEN-B", "wing": "Ground", "room_type": "Warden Office", "capacity": 5, "nearest_exit": "Ground Gate", "fire_extinguisher_id": "FE-HB-G02" }
+          ]
+        },
+        {
+          "floor_number": 2,
+          "name": "Second Floor",
+          "rooms": [
+            { "room_number": "B-204", "wing": "Block 1", "room_type": "Student Room", "capacity": 2, "nearest_exit": "Staircase A", "fire_extinguisher_id": "FE-HB-201" },
+            { "room_number": "B-205", "wing": "Block 1", "room_type": "Student Room", "capacity": 2, "nearest_exit": "Staircase A", "fire_extinguisher_id": "FE-HB-202" }
+          ]
+        }
+      ]
+    },
+    {
+      "id": 7,
+      "code": "HST-GIRLS",
+      "name": "Girls Hostel Block",
+      "category": "Residential",
+      "total_floors": 5,
+      "description": "Student Residential Block 2 with 24/7 Monitored Access & Resident Doctor",
+      "coordinates": { "lat": 12.9688, "lng": 77.5930 },
+      "evacuation_assembly_point": "Hostel 2 Inner Lawn",
+      "nearest_security_post": "Hostel 2 Guard Booth",
+      "floors": [
+        {
+          "floor_number": 0,
+          "name": "Ground Floor",
+          "rooms": [
+            { "room_number": "G-COMMON", "wing": "Ground", "room_type": "Common Hall", "capacity": 80, "nearest_exit": "Main Security Turnstile", "fire_extinguisher_id": "FE-HG-G01" },
+            { "room_number": "WARDEN-G", "wing": "Ground", "room_type": "Warden Office", "capacity": 5, "nearest_exit": "Main Turnstile", "fire_extinguisher_id": "FE-HG-G02" }
+          ]
+        },
+        {
+          "floor_number": 3,
+          "name": "Third Floor",
+          "rooms": [
+            { "room_number": "G-305", "wing": "Block 2", "room_type": "Student Room", "capacity": 2, "nearest_exit": "Staircase South", "fire_extinguisher_id": "FE-HG-301" },
+            { "room_number": "G-306", "wing": "Block 2", "room_type": "Student Room", "capacity": 2, "nearest_exit": "Staircase South", "fire_extinguisher_id": "FE-HG-302" }
+          ]
+        }
+      ]
+    }
+  ]
+}

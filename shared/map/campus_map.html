@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Campus Emergency Assistance — Live Campus Map (P3)</title>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: 'Outfit', -apple-system, BlinkMacSystemFont, sans-serif;
+    }
+    body {
+      background: #0f172a;
+      color: #f8fafc;
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+    header {
+      background: rgba(15, 23, 42, 0.9);
+      backdrop-filter: blur(12px);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+      padding: 12px 24px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      z-index: 1000;
+    }
+    .header-title {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .badge {
+      background: #dc2626;
+      color: #fff;
+      font-size: 11px;
+      font-weight: 700;
+      padding: 3px 8px;
+      border-radius: 9999px;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+      box-shadow: 0 0 12px rgba(220, 38, 38, 0.6);
+      animation: pulse-badge 2s infinite;
+    }
+    @keyframes pulse-badge {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50% { opacity: 0.85; transform: scale(1.05); }
+    }
+    .controls {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+    }
+    .filter-btn {
+      background: rgba(255, 255, 255, 0.08);
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      color: #cbd5e1;
+      padding: 6px 14px;
+      border-radius: 8px;
+      font-size: 13px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+    .filter-btn:hover, .filter-btn.active {
+      background: #2563eb;
+      color: #fff;
+      border-color: #3b82f6;
+    }
+    #map {
+      flex: 1;
+      width: 100%;
+      background: #020617;
+    }
+    .sidebar {
+      position: absolute;
+      top: 75px;
+      right: 20px;
+      width: 320px;
+      background: rgba(15, 23, 42, 0.92);
+      backdrop-filter: blur(16px);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      border-radius: 12px;
+      padding: 16px;
+      z-index: 1000;
+      box-shadow: 0 20px 40px rgba(0,0,0,0.5);
+      max-height: calc(100vh - 100px);
+      overflow-y: auto;
+    }
+    .sidebar h3 {
+      font-size: 15px;
+      color: #94a3b8;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      margin-bottom: 12px;
+    }
+    .alert-card {
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-left: 4px solid #ef4444;
+      border-radius: 8px;
+      padding: 12px;
+      margin-bottom: 10px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+    .alert-card:hover {
+      background: rgba(255, 255, 255, 0.08);
+      transform: translateY(-2px);
+    }
+    .alert-card.critical { border-left-color: #ef4444; }
+    .alert-card.high { border-left-color: #f59e0b; }
+    .alert-card.medium { border-left-color: #3b82f6; }
+    .pulse-marker {
+      width: 24px;
+      height: 24px;
+      border-radius: 50%;
+      background: #ef4444;
+      box-shadow: 0 0 0 rgba(239, 68, 68, 0.7);
+      animation: pulse-ring 1.5s infinite;
+    }
+    @keyframes pulse-ring {
+      0% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.8); }
+      70% { box-shadow: 0 0 0 15px rgba(239, 68, 68, 0); }
+      100% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0); }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="header-title">
+      <h2>Campus Emergency Map & Live View</h2>
+      <span class="badge">Module: P3</span>
+    </div>
+    <div class="controls">
+      <button class="filter-btn active" onclick="filterAlerts('ALL')">All Hazards</button>
+      <button class="filter-btn" onclick="filterAlerts('CRITICAL')">Critical</button>
+      <button class="filter-btn" onclick="filterAlerts('HIGH')">High</button>
+      <button class="filter-btn" onclick="filterAlerts('MEDIUM')">Medium</button>
+    </div>
+  </header>
+
+  <div id="map"></div>
+
+  <div class="sidebar">
+    <h3>Live Distress Feed</h3>
+    <div id="alerts-feed"></div>
+  </div>
+
+  <script>
+    // Initialize Campus Map centered on Main University Campus
+    const map = L.map('map', { zoomControl: false }).setView([12.9716, 77.5946], 16);
+    L.control.zoom({ position: 'bottomleft' }).addTo(map);
+
+    // Dark-mode Map Tiles
+    L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
+      maxZoom: 19,
+      attribution: '&copy; CartoDB & OpenStreetMap'
+    }).addTo(map);
+
+    // Campus Buildings from P3 Dataset
+    const buildings = [
+      { name: "Engineering Block A", code: "ENG-A", lat: 12.9725, lng: 77.5935, floors: 4, exit: "North Lawn Point A" },
+      { name: "Engineering Block B", code: "ENG-B", lat: 12.9732, lng: 77.5942, floors: 4, exit: "Central Quadrangle" },
+      { name: "Science & Humanities", code: "SCI-MAIN", lat: 12.9712, lng: 77.5955, floors: 3, exit: "Botanical Garden" },
+      { name: "Central Library", code: "LIB", lat: 12.9705, lng: 77.5938, floors: 2, exit: "Library Courtyard" },
+      { name: "Admin Building", code: "ADM", lat: 12.9718, lng: 77.5922, floors: 3, exit: "Flagpole Circle Lawn" },
+      { name: "Boys Hostel Block", code: "HST-BOYS", lat: 12.9692, lng: 77.5950, floors: 5, exit: "Football Field" },
+      { name: "Girls Hostel Block", code: "HST-GIRLS", lat: 12.9688, lng: 77.5930, floors: 5, exit: "Hostel 2 Inner Lawn" }
+    ];
+
+    // Plot Building Polygons / Circles
+    buildings.forEach(b => {
+      const circle = L.circle([b.lat, b.lng], {
+        color: '#38bdf8',
+        fillColor: '#0284c7',
+        fillOpacity: 0.25,
+        radius: 35
+      }).addTo(map);
+
+      circle.bindPopup(`
+        <div style="color: #0f172a; font-family: Outfit, sans-serif;">
+          <h4 style="margin: 0 0 4px 0; font-weight: 700;">${b.name} (${b.code})</h4>
+          <p style="margin: 0 0 4px 0; font-size: 12px; color: #475569;">Total Floors: ${b.floors}</p>
+          <p style="margin: 0; font-size: 11px; color: #0284c7;"><b>Evacuation Assembly:</b> ${b.exit}</p>
+        </div>
+      `);
+    });
+
+    // Sample Active Emergency Markers (Day 1 Mock Data)
+    const activeAlerts = [
+      { id: "ALT-20261001-101", code: "ALT-101", type: "Fire / Smoke", priority: "CRITICAL", building: "ENG-A", room: "LAB-1", floor: 1, lat: 12.9725, lng: 77.5935, time: "2 min ago" },
+      { id: "ALT-20261001-102", code: "ALT-102", type: "Medical Emergency", priority: "CRITICAL", building: "SCI-MAIN", room: "G02", floor: 0, lat: 12.9712, lng: 77.5955, time: "5 min ago" },
+      { id: "ALT-20261001-103", code: "ALT-103", type: "Accident", priority: "HIGH", building: "ENG-B", room: "101", floor: 1, lat: 12.9732, lng: 77.5942, time: "12 min ago" },
+      { id: "ALT-20261001-104", code: "ALT-104", type: "Fall / Injury", priority: "MEDIUM", building: "LIB", room: "G-READING", floor: 0, lat: 12.9705, lng: 77.5938, time: "25 min ago" }
+    ];
+
+    const markers = [];
+
+    function renderFeed(filter = 'ALL') {
+      const feed = document.getElementById('alerts-feed');
+      feed.innerHTML = '';
+      markers.forEach(m => map.removeLayer(m));
+      markers.length = 0;
+
+      activeAlerts
+        .filter(a => filter === 'ALL' || a.priority === filter)
+        .forEach(a => {
+          // Card
+          const card = document.createElement('div');
+          card.className = `alert-card ${a.priority.toLowerCase()}`;
+          card.innerHTML = `
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
+              <strong style="color: #fff; font-size: 13px;">${a.type}</strong>
+              <span style="font-size: 10px; font-weight: 700; color: ${a.priority === 'CRITICAL' ? '#ef4444' : a.priority === 'HIGH' ? '#f59e0b' : '#38bdf8'};">${a.priority}</span>
+            </div>
+            <div style="font-size: 12px; color: #94a3b8;">
+              ${a.building} &bull; Floor ${a.floor} &bull; Room ${a.room}
+            </div>
+            <div style="font-size: 10px; color: #64748b; margin-top: 4px;">${a.time}</div>
+          `;
+          card.onclick = () => {
+            map.flyTo([a.lat, a.lng], 18, { duration: 1.2 });
+          };
+          feed.appendChild(card);
+
+          // Pulsing Map Marker
+          const icon = L.divIcon({
+            className: 'pulse-icon',
+            html: `<div class="pulse-marker" style="background: ${a.priority === 'CRITICAL' ? '#ef4444' : a.priority === 'HIGH' ? '#f59e0b' : '#3b82f6'};"></div>`,
+            iconSize: [24, 24],
+            iconAnchor: [12, 12]
+          });
+
+          const marker = L.marker([a.lat, a.lng], { icon }).addTo(map);
+          marker.bindPopup(`
+            <div style="color: #0f172a; font-family: Outfit, sans-serif;">
+              <span style="background: #ef4444; color: white; padding: 2px 6px; font-size: 10px; border-radius: 4px; font-weight: 700;">${a.priority}</span>
+              <h4 style="margin: 6px 0 2px 0;">${a.type}</h4>
+              <p style="margin: 0; font-size: 12px;"><b>Location:</b> ${a.building}, Floor ${a.floor}, Room ${a.room}</p>
+            </div>
+          `);
+          markers.push(marker);
+        });
+    }
+
+    function filterAlerts(priority) {
+      document.querySelectorAll('.filter-btn').forEach(btn => btn.classList.remove('active'));
+      event.target.classList.add('active');
+      renderFeed(priority);
+    }
+
+    renderFeed('ALL');
+  </script>
+</body>
+</html>
