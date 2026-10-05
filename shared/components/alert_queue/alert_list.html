@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Shared Alert Queue Demo (P3 Component)</title>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="alert_list.css">
+  <style>
+    body {
+      background: #020617;
+      padding: 30px 20px;
+    }
+    .demo-bar {
+      max-width: 1000px;
+      margin: 0 auto 20px auto;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      color: #94a3b8;
+      font-family: 'Outfit', sans-serif;
+    }
+  </style>
+</head>
+<body>
+  <div class="demo-bar">
+    <span><b>P3 Shared Component:</b> Alert Queue / Live Alert List</span>
+    <span>API: <code>http://localhost:8000/api</code></span>
+  </div>
+
+  <div id="alert-queue-root"></div>
+
+  <script src="alert_list.js"></script>
+  <script>
+    // Initialize component in Admin mode (with action controls)
+    const alertQueueInstance = new AlertQueueComponent({
+      containerId: 'alert-queue-root',
+      apiBaseUrl: 'http://localhost:8000/api',
+      mode: 'admin'
+    });
+  </script>
+</body>
+</html>
